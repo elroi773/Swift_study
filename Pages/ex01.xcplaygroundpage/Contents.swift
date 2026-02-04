@@ -332,6 +332,68 @@ struct Ring: View {
     }
 }
 
+// MARK: - iPhone Frame (Playground)
+
+struct PhoneFrame<Content: View>: View {
+    @ViewBuilder var content: () -> Content
+
+    // Smaller preview size for Playground (부담 없게)
+    private let phoneSize = CGSize(width: 330, height: 720)
+    private let cornerRadius: CGFloat = 44
+
+    var body: some View {
+        ZStack {
+            // Outer bezel
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .fill(Color.black)
+                .shadow(radius: 18, y: 10)
+
+            // Screen
+            RoundedRectangle(cornerRadius: cornerRadius - 10, style: .continuous)
+                .fill(Color(.systemBackground))
+                .overlay {
+                    content()
+                        .clipShape(
+                            RoundedRectangle(cornerRadius: cornerRadius - 10, style: .continuous)
+                        )
+                }
+                .padding(10)
+
+            // Notch + Home indicator
+            VStack {
+                ZStack {
+                    Capsule(style: .continuous)
+                        .fill(Color.black)
+                        .frame(width: 150, height: 30)
+                        .shadow(color: .black.opacity(0.35), radius: 8, x: 0, y: 4)
+
+                    HStack(spacing: 10) {
+                        Circle()
+                            .fill(Color.black.opacity(0.9))
+                            .frame(width: 10, height: 10)
+                        Capsule(style: .continuous)
+                            .fill(Color.black.opacity(0.85))
+                            .frame(width: 56, height: 7)
+                    }
+                }
+                .padding(.top, 12)
+
+                Spacer()
+
+                Capsule(style: .continuous)
+                    .fill(Color.white.opacity(0.25))
+                    .frame(width: 120, height: 6)
+                    .padding(.bottom, 14)
+            }
+            .frame(width: phoneSize.width, height: phoneSize.height)
+            .allowsHitTesting(false)
+        }
+        .frame(width: phoneSize.width, height: phoneSize.height)
+        .padding(12)
+        .background(Color(.secondarySystemBackground))
+    }
+}
+
 // MARK: - Supporting Types
 
 enum FocusMode: String, CaseIterable, Identifiable {
@@ -388,4 +450,4 @@ struct DetailView: View {
 
 // MARK: - Playground Live View
 PlaygroundPage.current.needsIndefiniteExecution = true
-PlaygroundPage.current.setLiveView(ContentView())
+PlaygroundPage.current.setLiveView(PhoneFrame { ContentView() })
